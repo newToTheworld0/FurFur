@@ -1,6 +1,9 @@
 tensorflow==2.21.0
 tensorflow-datasets
 numpy
-pillow
+Pillow
 opencv-python
 importlib_resources
+fastapi
+uvicorn
+python-multipart

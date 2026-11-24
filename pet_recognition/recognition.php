@@ -587,7 +587,7 @@ AHHHHHHHHHHHHHHHHHHHHH
 
     <div class="scanner-header">
         <h1>Pet Recognition</h1>
-        <a href="../homepage/home.html" class="back-home-btn">
+        <a href="../stray_safe/home.php" class="back-home-btn">
             <i class="fas fa-arrow-left"></i>
             Back to Home
         </a>
