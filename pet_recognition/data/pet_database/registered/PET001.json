@@ -1,0 +1,6 @@
+{
+    "pet_id": "PET001",
+    "pet_name": "Astra",
+    "registered_images": 3,
+    "embedding_features": 1280
+}
