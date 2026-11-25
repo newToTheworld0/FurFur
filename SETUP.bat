@@ -50,7 +50,7 @@ py -3.13 --version >nul 2>&1
 
 if errorlevel 1 (
     echo %GREEN%========================================%RESET%
-    echo %YELLOW%???? ---- RERUN the SETUP.bat after new Python just Installed and it will work accordingly ---- ???? %RESET%
+    echo %YELLOW%RERUN the SETUP.bat after new Python just Installed and it will work accordingly%RESET%
     echo %GREEN%========================================%RESET%
     pause
     exit /b 1
