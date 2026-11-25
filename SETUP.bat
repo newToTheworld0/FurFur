@@ -1,4 +1,11 @@
 @echo off
+for /F %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
+
+set "YELLOW=%ESC%[93m"
+set "GREEN=%ESC%[92m"
+set "RED=%ESC%[91m"
+set "RESET=%ESC%[0m"
+
 title Stray Safe - Backend and Database Setup
 
 cd /d "%~dp0"
@@ -42,9 +49,9 @@ if errorlevel 1 (
 py -3.13 --version >nul 2>&1
 
 if errorlevel 1 (
-    echo %ESC%[92m========================================%ESC%[0m
-    echo %ESC%[93m???? ---- RERUN the SETUP.bat after new Python just Installed and it will work accordingly ---- ???? %ESC%[0m
-    echo %ESC%[92m========================================%ESC%[0m
+    echo %GREEN%========================================%RESET%
+    echo %YELLOW%???? ---- RERUN the SETUP.bat after new Python just Installed and it will work accordingly ---- ???? %RESET%
+    echo %GREEN%========================================%RESET%
     pause
     exit /b 1
 )

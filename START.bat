@@ -1,5 +1,11 @@
-
 @echo off
+for /F %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
+
+set "YELLOW=%ESC%[93m"
+set "GREEN=%ESC%[92m"
+set "RED=%ESC%[91m"
+set "RESET=%ESC%[0m"
+
 title Stray Safe - AI Backend
 
 cd /d "%~dp0"
@@ -34,6 +40,12 @@ if not exist "pet_recognition\pet_breed_mobilenet_finetuned.keras" (
 echo Starting FastAPI server...
 echo Address: http://127.0.0.1:8000
 echo Press CTRL+C to stop the server.
+echo.
+
+echo.
+echo %YELLOW%============================================================================%RESET%
+echo %GREEN% STARTING BACKEND DONT CLOSE THIS TERMINAL FOR THE WHOLE SESSION OF WEBSITE%RESET%
+echo %YELLOW%============================================================================%RESET%
 echo.
 
 REM Run backend from its own directory
