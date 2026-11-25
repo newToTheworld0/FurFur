@@ -61,3 +61,11 @@ CREATE TABLE post_bookmarks (
 
     UNIQUE KEY unique_bookmark (user_id, post_id)
 );
+
+USE `stray_safe_db`;
+
+ALTER TABLE `users`
+  ADD COLUMN `bio` VARCHAR(255) DEFAULT 'Welcome to my StraySafe profile.',
+  ADD COLUMN `about_me` TEXT,
+  ADD COLUMN `location` VARCHAR(150) DEFAULT 'Pampanga, Philippines',
+  ADD COLUMN `avatar` VARCHAR(255) DEFAULT 'paw.png';
