@@ -888,5 +888,6 @@ if (isset($conn) && ($conn instanceof mysqli) && !$conn->connect_error) {
             });
         })();
     </script>
+    <script src="script.js"></script>
 </body>
 </html>

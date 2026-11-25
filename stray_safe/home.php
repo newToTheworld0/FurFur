@@ -134,13 +134,15 @@
                 <i class="fa-solid fa-camera petscan-camera-icon" aria-hidden="true"></i>
             </div>
 
-            <button type="button" id="openPetScanBtn" class="petscan-open-btn">
-                Open Camera!
+            <button type="button" id="openPetScanBtn" class="petscan-open-btn"
+                onclick="window.location.href='../pet_recognition/recognition.php'">
+                    Open Camera!
             </button>
         </div>
     </div>
 </section>
 
+<!-- Paltan ko -->
 <!-- PetScan Camera / Photo Modal -->
 <div id="petScanModal" class="petscan-modal" role="dialog" aria-modal="true" aria-labelledby="petScanModalTitle">
     <div class="petscan-modal-box">
@@ -499,7 +501,6 @@
         modal.classList.remove('open');
     }
 
-    if (openBtn) openBtn.addEventListener('click', openModal);
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
     if (modal) {

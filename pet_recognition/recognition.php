@@ -1,5 +1,6 @@
-
 <?php
+require_once __DIR__ . '/../stray_safe/navbar.php';
+
 $success_message = "";
 $breed_results = [];
 $pet_results = [];
@@ -11,7 +12,6 @@ $uploaded_image = null;
 $image_name = "";
 
 
-// Function for sending an image to FastAPI
 function sendToRecognitionAPI($api_url, $image)
 {
     $curl_file = new CURLFile(
@@ -138,806 +138,790 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pet Recognition | Stray Safe</title>
+        <link rel="stylesheet" href="../stray_safe/style.css">
 
-    <title>Pet Recognition | Stray Safe</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
 
-<style>
+            .recognition-content {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #fffcfa;
+                color: #333;
+            }
 
-* {
-    box-sizing: border-box;
-}
+            /* Heading */
 
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #FFFCFA;
-    color: #333;
-}
+            .recognition-content h1 {
+                color: #188175;
+                margin: 0 0 8px;
+            }
 
-/* Heading */
+            .recognition-content h2,
+            .recognition-content h3 {
+                margin-top: 0;
+            }
 
-h1 {
-    color: #188175;
-    margin: 0 0 8px;
-}
+            .recognition-content h3 {
+                color: #188175;
+            }
 
-h2, h3 {
-    margin-top: 0;
-}
+            /* Upload form */
 
-h3 {
-    color: #188175;
-}
+            form {
+                margin-top: 18px;
+                margin-bottom: 18px;
+                padding: 15px;
+                background-color: white;
+                border-radius: 12px;
+            }
 
-/* Upload form */
+            input[type="file"] {
+                display: block;
+                margin: 12px 0;
+            }
 
-form {
-    margin-top: 18px;
-    margin-bottom: 18px;
-    padding: 15px;
-    background-color: white;
-    border-radius: 12px;
-}
+            button {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 8px;
+                background: linear-gradient(100deg, #188175, #4ea179);
+                color: white;
+                cursor: pointer;
+            }
 
-input[type="file"] {
-    display: block;
-    margin: 12px 0;
-}
+            button:hover {
+                opacity: 0.9;
+            }
 
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    background: linear-gradient(100deg, #188175, #4EA179);
-    color: white;
-    cursor: pointer;
-}
+            /* Main recognition layout */
 
-button:hover {
-    opacity: 0.9;
-}
+            .recognition-container {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 20px;
+                align-items: stretch;
+                margin-top: 20px;
+            }
 
-/* Main recognition layout */
+            /* Uploaded image */
 
-.recognition-container {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 20px;
-    align-items: stretch;
-    margin-top: 20px;
-}
+            .image-container {
+                background-color: white;
+                padding: 15px;
+                border-radius: 15px;
+                text-align: center;
+                min-width: 0;
+            }
 
-/* Uploaded image */
+            .pet-image {
+                display: block;
+                width: 100%;
+                max-width: 400px;
+                max-height: 400px;
+                height: auto;
+                object-fit: contain;
+                margin: 0 auto;
+                border-radius: 12px;
+            }
 
-.image-container {
-    background-color: white;
-    padding: 15px;
-    border-radius: 15px;
-    text-align: center;
-    min-width: 0;
-}
+            /* Right side */
 
-.pet-image {
-    display: block;
-    width: 100%;
-    max-width: 400px;
-    max-height: 400px;
-    height: auto;
-    object-fit: contain;
-    margin: 0 auto;
-    border-radius: 12px;
-}
+            .results-container {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                min-width: 0;
+                min-height: 0;
+            }
 
-/* Right side */
+            /* Result boxes */
 
-.results-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    min-width: 0;
-    min-height: 0;
-}
+            .breed-results,
+            .pet-results {
+                background-color: white;
+                padding: 15px;
+                border-radius: 15px;
+                min-width: 0;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
 
-/* Result boxes */
+            /* Only these lists scroll */
 
-.breed-results,
-.pet-results {
-    background-color: white;
-    padding: 15px;
-    border-radius: 15px;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
+            .breed-list,
+            .pet-list {
+                flex: 1;
+                min-height: 0;
+                max-height: 250px;
+                overflow-y: auto;
+                border-radius: 10px;
+            }
 
-/* Only these lists scroll */
+            /* Individual results */
 
-.breed-list,
-.pet-list {
-    flex: 1;
-    min-height: 0;
-    max-height: 250px;
-    overflow-y: auto;
-    border-radius: 10px;
-}
+            .breed-item,
+            .pet-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding: 13px;
+                margin-bottom: 8px;
+                background-color: #fffcfa;
+                border-radius: 10px;
+            }
 
-/* Individual results */
+            /* First result stays at the top */
 
-.breed-item,
-.pet-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 13px;
-    margin-bottom: 8px;
-    background-color: #FFFCFA;
-    border-radius: 10px;
-}
+            .pinned-result {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                background-color: #188175;
+                color: white;
+                border: 1px solid #4ea179;
+                font-weight: bold;
+            }
 
-/* First result stays at the top */
+            /* Responsive layout */
 
-.pinned-result {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background-color: #188175;
-    color: white;
-    border: 1px solid #4EA179;
-    font-weight: bold;
-}
+            @media (max-width: 768px) {
+                .recognition-content {
+                    padding: 15px;
+                }
 
-/* Responsive layout */
+                .recognition-container {
+                    grid-template-columns: 1fr;
+                }
 
-@media (max-width: 768px) {
+                .pet-image {
+                    max-width: 350px;
+                    max-height: 350px;
+                }
+            }
 
-    body {
-        padding: 15px;
-    }
-
-    .recognition-container {
-        grid-template-columns: 1fr;
-    }
-
-    .pet-image {
-        max-width: 350px;
-        max-height: 350px;
-    }
-
-}
-
-/* 
+            /* 
 AHHHHHHHHHHHHHHHHHHHHH 
 */
 
-
-@media (min-width: 769px) {
-
-    body {
-        padding: 18px 25px;
-        gap: 0;
-    }
-
-    h1 {
-        font-size: 27px;
-        margin: 0 0 5px;
-    }
-
-    body > p {
-        font-size: 15px;
-        margin: 0 0 12px;
-    }
-
-    body > form {
-        padding: 13px 16px;
-        margin: 8px 0;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    body > form input[type="file"] {
-        margin: 0;
-        min-width: 0;
-    }
-
-    body > form button {
-        padding: 10px 20px;
-        white-space: nowrap;
-    }
-
-    body > h2 {
-        font-size: 21px;
-        margin: 8px 0;
-    }
-
-    body > hr {
-        margin: 8px 0;
-    }
-
-    .recognition-container {
-        flex: none;
-        height: clamp(380px, 58vh, 520px);
-        margin-top: 10px;
-        gap: 20px;
-    }
-
-    .image-container {
-        padding: 18px;
-    }
-
-    .image-container h3 {
-        margin-bottom: 12px;
-    }
-
- .pet-image {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 450px;
-    max-height: 350px;
-    object-fit: contain;
-    margin: 0 auto;
-}
-
-    .results-container {
-        gap: 16px;
-    }
-
-    .breed-results,
-    .pet-results {
-        padding: 18px;
-    }
-
-    .breed-results h3,
-    .pet-results h3 {
-        margin-bottom: 12px;
-    }
-
-    .breed-list,
-    .pet-list {
-        flex: 1;
-        min-height: 0;
-        max-height: none;
-    }
-
-    .breed-item,
-    .pet-item {
-        padding: 14px;
-        margin-bottom: 9px;
-    }
-}
-
-
-/* Upload and camera controls */
-#recognition-form {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 14px 20px;
-    padding: 20px 24px;
-}
-
-#recognition-form input[type="file"] {
-    flex: 1;
-    min-width: 220px;
-    margin: 0;
-}
-
-#recognition-form label {
-    white-space: nowrap;
-}
-
-#recognition-form button {
-    padding: 12px 22px;
-    min-height: 44px;
-    white-space: nowrap;
-}
-
-/* Primary recognition button */
-#recognition-form button[type="submit"] {
-    background: linear-gradient(110deg, #F28C28, #F5B041);
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 3px 8px rgba(242, 140, 40, 0.22);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#recognition-form button[type="submit"]:hover {
-    background: linear-gradient(110deg, #E67E22, #F39C12);
-    transform: translateY(-1px);
-    box-shadow: 0 5px 12px rgba(242, 140, 40, 0.3);
-}
-
-/* Camera panel */
-
-/* Camera panel */
-#camera-container {
-    flex-basis: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 18px;
-    background: #FFFCFA;
-    border: 1px solid #e8eeeb;
-    border-radius: 12px;
-}
-
-#camera-container[hidden] {
-    display: none !important;
-}
-
-#camera-preview {
-    display: block;
-    width: 100%;
-    max-width: 520px;
-    max-height: 300px;
-    object-fit: contain;
-    border-radius: 10px;
-    background: #222;
-}
-
-.camera-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.camera-buttons button {
-    min-width: 130px;
-}
-
-@media (max-width: 768px) {
-    #camera-container {
-        width: 100%;
-    }
-
-    .camera-buttons {
-        width: 100%;
-    }
-
-    .camera-buttons button {
-        flex: 1;
-    }
-}
-
-/* Top notification */
-.notification {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-15px);
-
-    padding: 13px 22px;
-    min-width: 260px;
-    max-width: calc(100% - 30px);
-
-    background: #E8F6EE;
-    color: #176B43;
-    border: 2px solid #4EA179;
-    border-radius: 12px;
-
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-
-    box-shadow: 0 5px 18px rgba(24, 129, 117, 0.15);
-
-    opacity: 0;
-    visibility: hidden;
-    z-index: 9999;
-
-    transition: opacity 0.25s ease, transform 0.25s ease,
-                visibility 0.25s ease;
-}
-
-.notification.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
-}
-
-.scanner-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 0px;
-}
-
-.scanner-header h1 {
-    margin: 0;
-}
-
-.back-home-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: #188175;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: background 0.2s ease;
-}
-
-.back-home-btn:hover {
-    background: #12685f;
-}
-</style>
-
-
-</head>
-
-<body>
-    <div id="notification" class="notification" role="status" aria-live="polite"></div>
-
-    <div class="scanner-header">
-        <h1>Pet Recognition</h1>
-        <a href="../stray_safe/home.php" class="back-home-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Home
-        </a>
-    </div>
-
-    <p>
-        Upload a picture of a pet to identify its breed
-        and check whether it matches a registered pet.
-    </p>
-
-
-    <!-- Image Upload Form -->
-
-    
-<form id="recognition-form" method="POST" enctype="multipart/form-data">
-
-    <label for="pet_image">Upload a pet image:</label>
-    <input
-        type="file"
-        id="pet_image"
-        name="pet_image"
-        accept="image/jpeg,image/png,image/webp"
-    >
-
-    <button type="button" id="start-camera">Start Camera</button>
-
-    <div id="camera-container" hidden>
-        <video id="camera-preview" autoplay playsinline></video>
-
-        <div class="camera-buttons">
-            <button type="button" id="capture-photo">Take Photo</button>
-            <button type="button" id="stop-camera">Close Camera</button>
-        </div>
-    </div>
-
-    <p id="camera-message" aria-live="polite"></p>
-
-    <button type="submit">Recognize Pet</button>
-
-    <canvas id="capture-canvas" hidden></canvas>
-
-</form>
-
-
-
-    <?php if ($uploaded_image !== null): ?>
-
-        <hr>
-
-        <h2 id="results-heading">Recognition Results</h2>
-
-        <div class="recognition-container" id="recognition-results">
-
-            <!-- Uploaded Image -->
-
-            <div class="image-container">
-
-                <h3>Uploaded Image</h3>
-
-                <img
-                    src="<?php echo htmlspecialchars($uploaded_image); ?>"
-                    alt="Uploaded pet"
-                    class="pet-image"
-                >
-
-                <p>
-                    <?php echo htmlspecialchars($image_name); ?>
-                </p>
-
-            </div>
-
-
-            <!-- Recognition Results -->
-
-            <div class="results-container">
-
-                <!-- Breed Results -->
-
-                <div class="breed-results">
-
-                    <h3>Breed Classification</h3>
-
-                    <?php if ($breed_error !== ""): ?>
+            @media (min-width: 769px) {
+                .recognition-content {
+                    padding: 18px 25px;
+                    gap: 0;
+                }
+
+                .recognition-content h1 {
+                    font-size: 27px;
+                    margin: 0 0 5px;
+                }
+
+                .recognition-content > p {
+                    font-size: 15px;
+                    margin: 0 0 12px;
+                }
+
+                .recognition-content > form {
+                    padding: 13px 16px;
+                    margin: 8px 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+
+                .recognition-content > form input[type="file"] {
+                    margin: 0;
+                    min-width: 0;
+                }
+
+                .recognition-content > form button {
+                    padding: 10px 20px;
+                    white-space: nowrap;
+                }
+
+                .recognition-content > h2 {
+                    font-size: 21px;
+                    margin: 8px 0;
+                }
+
+                .recognition-content > hr {
+                    margin: 8px 0;
+                }
+
+                .recognition-container {
+                    flex: none;
+                    height: clamp(380px, 58vh, 520px);
+                    margin-top: 10px;
+                    gap: 20px;
+                }
+
+                .image-container {
+                    padding: 18px;
+                }
+
+                .image-container h3 {
+                    margin-bottom: 12px;
+                }
+
+                .pet-image {
+                    display: block;
+                    width: 100%;
+                    height: auto;
+                    max-width: 450px;
+                    max-height: 350px;
+                    object-fit: contain;
+                    margin: 0 auto;
+                }
+
+                .results-container {
+                    gap: 16px;
+                }
+
+                .breed-results,
+                .pet-results {
+                    padding: 18px;
+                }
+
+                .breed-results h3,
+                .pet-results h3 {
+                    margin-bottom: 12px;
+                }
+
+                .breed-list,
+                .pet-list {
+                    flex: 1;
+                    min-height: 0;
+                    max-height: none;
+                }
+
+                .breed-item,
+                .pet-item {
+                    padding: 14px;
+                    margin-bottom: 9px;
+                }
+            }
+
+            /* Upload and camera controls */
+            #recognition-form {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 14px 20px;
+                padding: 20px 24px;
+            }
+
+            #recognition-form input[type="file"] {
+                flex: 1;
+                min-width: 220px;
+                margin: 0;
+            }
+
+            #recognition-form label {
+                white-space: nowrap;
+            }
+
+            #recognition-form button {
+                padding: 12px 22px;
+                min-height: 44px;
+                white-space: nowrap;
+            }
+
+            /* Primary recognition button */
+            #recognition-form button[type="submit"] {
+                background: linear-gradient(110deg, #f28c28, #f5b041);
+                color: white;
+                font-weight: bold;
+                box-shadow: 0 3px 8px rgba(242, 140, 40, 0.22);
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            #recognition-form button[type="submit"]:hover {
+                background: linear-gradient(110deg, #e67e22, #f39c12);
+                transform: translateY(-1px);
+                box-shadow: 0 5px 12px rgba(242, 140, 40, 0.3);
+            }
+
+            /* Camera panel */
+
+            /* Camera panel */
+            #camera-container {
+                flex-basis: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 14px;
+                padding: 18px;
+                background: #fffcfa;
+                border: 1px solid #e8eeeb;
+                border-radius: 12px;
+            }
+
+            #camera-container[hidden] {
+                display: none !important;
+            }
+
+            #camera-preview {
+                display: block;
+                width: 100%;
+                max-width: 520px;
+                max-height: 300px;
+                object-fit: contain;
+                border-radius: 10px;
+                background: #222;
+            }
+
+            .camera-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .camera-buttons button {
+                min-width: 130px;
+            }
+
+            @media (max-width: 768px) {
+                #camera-container {
+                    width: 100%;
+                }
+
+                .camera-buttons {
+                    width: 100%;
+                }
+
+                .camera-buttons button {
+                    flex: 1;
+                }
+            }
+
+            /* Top notification */
+            .notification {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-15px);
+
+                padding: 13px 22px;
+                min-width: 260px;
+                max-width: calc(100% - 30px);
+
+                background: #e8f6ee;
+                color: #176b43;
+                border: 2px solid #4ea179;
+                border-radius: 12px;
+
+                font-size: 14px;
+                font-weight: 600;
+                text-align: center;
+
+                box-shadow: 0 5px 18px rgba(24, 129, 117, 0.15);
+
+                opacity: 0;
+                visibility: hidden;
+                z-index: 9999;
+
+                transition: opacity 0.25s ease, transform 0.25s ease,
+                    visibility 0.25s ease;
+            }
+
+            .notification.show {
+                opacity: 1;
+                visibility: visible;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .scanner-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 0px;
+            }
+
+            .scanner-header h1 {
+                margin: 0;
+            }
+
+            .back-home-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 16px;
+                background: #188175;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: background 0.2s ease;
+            }
+
+            .back-home-btn:hover {
+                background: #12685f;
+            }
+        </style>
+    </head>
+
+    <body>
+        <?php require_once __DIR__ . '/../stray_safe/navbar.php'; ?>
+        
+        <div class="recognition-content">
+            <div
+                id="notification"
+                class="notification"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+            <!--
+                <div class="scanner-header">
+                    <h1>Pet Recognition</h1>
+                    <a href="../stray_safe/home.php" class="back-home-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Home
+                    </a>
+                </div>
+            -->
+
+            <p>
+                Upload a picture of a pet to identify its breed and check whether it
+                matches a registered pet.
+            </p>
+
+            <!-- Image Upload Form -->
+
+            <form id="recognition-form" method="POST" enctype="multipart/form-data">
+                <label for="pet_image">Upload a pet image:</label>
+                <input
+                    type="file"
+                    id="pet_image"
+                    name="pet_image"
+                    accept="image/jpeg,image/png,image/webp"
+                />
+
+                <button type="button" id="start-camera">Start Camera</button>
+
+                <div id="camera-container" hidden>
+                    <video id="camera-preview" autoplay playsinline></video>
+
+                    <div class="camera-buttons">
+                        <button type="button" id="capture-photo">Take Photo</button>
+                        <button type="button" id="stop-camera">Close Camera</button>
+                    </div>
+                </div>
+
+                <p id="camera-message" aria-live="polite"></p>
+
+                <button type="submit">Recognize Pet</button>
+
+                <canvas id="capture-canvas" hidden></canvas>
+            </form>
+
+            <?php if ($uploaded_image !== null): ?>
+
+            <hr />
+
+            <h2 id="results-heading">Recognition Results</h2>
+
+            <div class="recognition-container" id="recognition-results">
+                <!-- Uploaded Image -->
+
+                <div class="image-container">
+                    <h3>Uploaded Image</h3>
+
+                    <img
+                        src="<?php echo htmlspecialchars($uploaded_image); ?>"
+                        alt="Uploaded pet"
+                        class="pet-image"
+                    />
+
+                    <p>
+                        <?php echo htmlspecialchars($image_name); ?>
+                    </p>
+                </div>
+
+                <!-- Recognition Results -->
+
+                <div class="results-container">
+                    <!-- Breed Results -->
+
+                    <div class="breed-results">
+                        <h3>Breed Classification</h3>
+
+                        <?php if ($breed_error !== ""): ?>
 
                         <p>
                             <?php echo htmlspecialchars($breed_error); ?>
                         </p>
 
-                    <?php elseif (count($breed_results) > 0): ?>
+                        <?php elseif (count($breed_results) >
+                        0): ?>
 
                         <div class="breed-list">
+                            <?php foreach ($breed_results as $index =>
+                            $breed): ?>
 
-                            <?php foreach ($breed_results as $index => $breed): ?>
+                            <div
+                                class="breed-item <?php echo $index === 0 ? 'pinned-result' : ''; ?>"
+                            >
+                                <span>
+                                    <?php echo $index + 1; ?>.
+                                    <?php echo htmlspecialchars($breed["breed"]); ?>
+                                </span>
 
-                                <div class="breed-item <?php echo $index === 0 ? 'pinned-result' : ''; ?>">
-
-                                    <span>
-                                        <?php echo $index + 1; ?>.
-                                        <?php echo htmlspecialchars($breed["breed"]); ?>
-                                    </span>
-
-                                    <span>
-                                        <?php echo number_format($breed["score"] * 100, 2); ?>%
-                                    </span>
-
-                                </div>
+                                <span>
+                                    <?php echo number_format($breed["score"] * 100, 2); ?>%
+                                </span>
+                            </div>
 
                             <?php endforeach; ?>
-
                         </div>
 
-                    <?php else: ?>
+                        <?php else: ?>
 
                         <p>No breed predictions available.</p>
 
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
 
-                </div>
+                    <!-- Individual Pet Results -->
 
+                    <div class="pet-results">
+                        <h3>Pet Identification</h3>
 
-                <!-- Individual Pet Results -->
-
-                <div class="pet-results">
-
-                    <h3>Pet Identification</h3>
-
-                    <?php if ($pet_error !== ""): ?>
+                        <?php if ($pet_error !== ""): ?>
 
                         <p>
                             <?php echo htmlspecialchars($pet_error); ?>
                         </p>
 
-                    <?php elseif (count($pet_results) > 0): ?>
+                        <?php elseif (count($pet_results) >
+                        0): ?>
 
                         <div class="pet-list">
+                            <?php foreach ($pet_results as $index =>
+                            $pet): ?>
 
-                            <?php foreach ($pet_results as $index => $pet): ?>
+                            <div
+                                class="pet-item <?php echo $index === 0 ? 'pinned-result' : ''; ?>"
+                            >
+                                <span>
+                                    <?php echo $index + 1; ?>.
+                                    <?php echo htmlspecialchars($pet["pet_name"]); ?>
+                                </span>
 
-                                <div class="pet-item <?php echo $index === 0 ? 'pinned-result' : ''; ?>">
+                                <span>
+                                    <?php echo htmlspecialchars($pet["pet_id"]); ?>
+                                </span>
 
-                                    <span>
-                                        <?php echo $index + 1; ?>.
-                                        <?php echo htmlspecialchars($pet["pet_name"]); ?>
-                                    </span>
-
-                                    <span>
-                                        <?php echo htmlspecialchars($pet["pet_id"]); ?>
-                                    </span>
-
-                                    <span>
-                                        <?php echo number_format($pet["similarity"] * 100, 2); ?>%
-                                    </span>
-
-                                </div>
+                                <span>
+                                    <?php echo number_format($pet["similarity"] * 100, 2); ?>%
+                                </span>
+                            </div>
 
                             <?php endforeach; ?>
-
                         </div>
 
-                    <?php else: ?>
+                        <?php else: ?>
 
                         <p>No matching registered pets found.</p>
 
-                    <?php endif; ?>
-
+                        <?php endif; ?>
+                    </div>
                 </div>
-
             </div>
+            <?php endif; ?>    
+       </div>
 
-        </div>
+        <script>
 
-    <?php endif; ?>
+            const form = document.getElementById("recognition-form");
 
-    <script> 
+            const startCameraButton = document.getElementById("start-camera");
+            const captureButton = document.getElementById("capture-photo");
+            const stopCameraButton = document.getElementById("stop-camera");
 
-const form = document.getElementById("recognition-form");
+            const cameraContainer = document.getElementById("camera-container");
+            const video = document.getElementById("camera-preview");
+            const canvas = document.getElementById("capture-canvas");
 
-const startCameraButton = document.getElementById("start-camera");
-const captureButton = document.getElementById("capture-photo");
-const stopCameraButton = document.getElementById("stop-camera");
+            const imageInput = document.getElementById("pet_image");
+            const cameraMessage = document.getElementById("camera-message");
 
-const cameraContainer = document.getElementById("camera-container");
-const video = document.getElementById("camera-preview");
-const canvas = document.getElementById("capture-canvas");
+            const notification = document.getElementById("notification");
 
-const imageInput = document.getElementById("pet_image");
-const cameraMessage = document.getElementById("camera-message");
+            let notificationTimer;
 
-const notification = document.getElementById("notification");
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add("show");
 
-let notificationTimer;
+                clearTimeout(notificationTimer);
 
-function showNotification(message) {
-    notification.textContent = message;
-    notification.classList.add("show");
+                notificationTimer = setTimeout(() => {
+                    notification.classList.remove("show");
+                }, 3500);
+            }
 
-    clearTimeout(notificationTimer);
+            <?php if ($success_message !== ""): ?>
+                showNotification(<?php echo json_encode($success_message); ?>);
+            <?php endif; ?>
 
-    notificationTimer = setTimeout(() => {
-        notification.classList.remove("show");
-    }, 3500);
-}
-
-<?php if ($success_message !== ""): ?>
-    showNotification(<?php echo json_encode($success_message); ?>);
-<?php endif; ?>
-
-let cameraStream = null;
+            let cameraStream = null;
 
 
-// Stop the camera and release its resources
-function stopCameraStream() {
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-    }
+            // Stop the camera and release its resources
+            function stopCameraStream() {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraStream = null;
+                }
 
-    video.srcObject = null;
-}
-
-
-// Close the camera panel
-function closeCameraPanel() {
-    stopCameraStream();
-    cameraContainer.hidden = true;
-}
+                video.srcObject = null;
+            }
 
 
-// Start the camera
-startCameraButton.addEventListener("click", async () => {
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        cameraMessage.textContent =
-            "Camera access is not supported by this browser.";
-        return;
-    }
-
-    try {
-        startCameraButton.disabled = true;
-
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: { ideal: "environment" }
-            },
-            audio: false
-        });
-
-        video.srcObject = cameraStream;
-        cameraContainer.hidden = false;
-
-        cameraMessage.textContent = "Camera ready. Take a photo.";
-
-    } catch (error) {
-        cameraMessage.textContent =
-            "Unable to access camera. Check your browser permissions.";
-
-        stopCameraStream();
-
-    } finally {
-        startCameraButton.disabled = false;
-    }
-});
+            // Close the camera panel
+            function closeCameraPanel() {
+                stopCameraStream();
+                cameraContainer.hidden = true;
+            }
 
 
-// Take a photo and immediately recognize it
-captureButton.addEventListener("click", () => {
+            // Start the camera
+            startCameraButton.addEventListener("click", async () => {
 
-    if (!cameraStream) {
-        return;
-    }
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    cameraMessage.textContent =
+                        "Camera access is not supported by this browser.";
+                    return;
+                }
 
-    const width = video.videoWidth;
-    const height = video.videoHeight;
+                try {
+                    startCameraButton.disabled = true;
 
-    if (width === 0 || height === 0) {
-        cameraMessage.textContent =
-            "Camera is not ready yet. Please wait.";
-        return;
-    }
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: { ideal: "environment" }
+                        },
+                        audio: false
+                    });
 
-    canvas.width = width;
-    canvas.height = height;
+                    video.srcObject = cameraStream;
+                    cameraContainer.hidden = false;
 
-    const context = canvas.getContext("2d");
+                    cameraMessage.textContent = "Camera ready. Take a photo.";
 
-    context.drawImage(video, 0, 0, width, height);
+                } catch (error) {
+                    cameraMessage.textContent =
+                        "Unable to access camera. Check your browser permissions.";
 
-    canvas.toBlob((blob) => {
+                    stopCameraStream();
 
-        if (!blob) {
-            cameraMessage.textContent = "Failed to capture photo.";
-            return;
-        }
-
-        const photoFile = new File(
-            [blob],
-            "camera-capture.jpg",
-            { type: "image/jpeg" }
-        );
-
-        const transfer = new DataTransfer();
-        transfer.items.add(photoFile);
-
-        imageInput.files = transfer.files;
-
-        // Close the camera before submitting
-        closeCameraPanel();
-        
-        // Automatically submit the existing PHP form
-        form.requestSubmit();
-
-    }, "image/jpeg", 0.92);
-});
+                } finally {
+                    startCameraButton.disabled = false;
+                }
+            });
 
 
-// Manually close the camera
-stopCameraButton.addEventListener("click", () => {
+            // Take a photo and immediately recognize it
+            captureButton.addEventListener("click", () => {
 
-    closeCameraPanel();
+                if (!cameraStream) {
+                    return;
+                }
 
-    cameraMessage.textContent = "Camera closed.";
-});
+                const width = video.videoWidth;
+                const height = video.videoHeight;
 
-const resultsSection = document.getElementById("recognition-results");
-const resultsHeading = document.getElementById("results-heading");
+                if (width === 0 || height === 0) {
+                    cameraMessage.textContent =
+                        "Camera is not ready yet. Please wait.";
+                    return;
+                }
 
-// Clear previous results when selecting a new image
-imageInput.addEventListener("change", () => {
+                canvas.width = width;
+                canvas.height = height;
 
-    if (imageInput.files.length > 0) {
+                const context = canvas.getContext("2d");
 
-        closeCameraPanel();
+                context.drawImage(video, 0, 0, width, height);
 
-        // Hide previous recognition results
-        if (resultsSection) {
-            resultsSection.style.display = "none";
-        }
+                canvas.toBlob((blob) => {
 
-        if (resultsHeading) {
-            resultsHeading.style.display = "none";
-        }
+                    if (!blob) {
+                        cameraMessage.textContent = "Failed to capture photo.";
+                        return;
+                    }
 
-        showNotification("Image selected. Click Recognize Pet.");
-    }
-});
+                    const photoFile = new File(
+                        [blob],
+                        "camera-capture.jpg",
+                        { type: "image/jpeg" }
+                    );
+
+                    const transfer = new DataTransfer();
+                    transfer.items.add(photoFile);
+
+                    imageInput.files = transfer.files;
+
+                    // Close the camera before submitting
+                    closeCameraPanel();
+
+                    // Automatically submit the existing PHP form
+                    form.requestSubmit();
+
+                }, "image/jpeg", 0.92);
+            });
 
 
-// Release camera resources when leaving the page
-window.addEventListener("beforeunload", stopCameraStream);
+            // Manually close the camera
+            stopCameraButton.addEventListener("click", () => {
 
-    </script>
-</body>
+                closeCameraPanel();
+
+                cameraMessage.textContent = "Camera closed.";
+            });
+
+            const resultsSection = document.getElementById("recognition-results");
+            const resultsHeading = document.getElementById("results-heading");
+
+            // Clear previous results when selecting a new image
+            imageInput.addEventListener("change", () => {
+
+                if (imageInput.files.length > 0) {
+
+                    closeCameraPanel();
+
+                    // Hide previous recognition results
+                    if (resultsSection) {
+                        resultsSection.style.display = "none";
+                    }
+
+                    if (resultsHeading) {
+                        resultsHeading.style.display = "none";
+                    }
+
+                    showNotification("Image selected. Click Recognize Pet.");
+                }
+            });
+
+
+            // Release camera resources when leaving the page
+            window.addEventListener("beforeunload", stopCameraStream);
+        </script>
+        <script src="../stray_safe/script.js"></script>
+    </body>
 </html>
