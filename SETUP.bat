@@ -1,4 +1,3 @@
-```bat
 @echo off
 title Stray Safe - Backend and Database Setup
 
@@ -43,7 +42,9 @@ if errorlevel 1 (
 py -3.13 --version >nul 2>&1
 
 if errorlevel 1 (
-    echo ERROR: Python 3.13 could not be detected.
+    echo %ESC%[92m========================================%ESC%[0m
+    echo %ESC%[93m???? ---- RERUN the SETUP.bat after new Python just Installed and it will work accordingly ---- ???? %ESC%[0m
+    echo %ESC%[92m========================================%ESC%[0m
     pause
     exit /b 1
 )
@@ -51,7 +52,7 @@ if errorlevel 1 (
 :CREATE_VENV
 
 echo.
-echo Creating virtual environment...
+echo %ESC%[92mCreating virtual environment...%ESC%[0m
 
 py -3.13 -m venv .venv
 
@@ -162,4 +163,3 @@ echo.
 echo You can now run START.bat.
 echo.
 pause
-```
